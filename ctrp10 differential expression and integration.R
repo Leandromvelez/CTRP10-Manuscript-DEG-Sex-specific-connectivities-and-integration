@@ -1,4 +1,3 @@
-setwd('G:/My Drive/lab files/Will Wong/CTRP10/')
 library(ggVennDiagram)
 library(stringr)
 library(reshape2)
@@ -109,8 +108,9 @@ proportions_plot(0.05)
 plot_intersects = function(pval_threshold){
   cof1_table = res1[res1$P.Value<pval_threshold,]
   cof1_table$tissue =gsub(".*_", "", cof1_table$ID)
-  table(cof1_table$tissue)
-  gene_list <- list(Liver= cof1_table$ID[cof1_table$tissue=='Liver'], gWAT= cof1_table$ID[cof1_table$tissue=='gWAT'], iWAT= cof1_table$ID[cof1_table$tissue=='iWAT'], Muscle= cof1_table$ID[cof1_table$tissue=='Muscle'])
+  cof1_table$ID2 =gsub("\\_.*","", cof1_table$ID)
+  table(cof1_table$ID2)
+  gene_list <- list(Liver= cof1_table$ID2[cof1_table$tissue=='Liver'], gWAT= cof1_table$ID2[cof1_table$tissue=='gWAT'], iWAT= cof1_table$ID2[cof1_table$tissue=='iWAT'], Muscle= cof1_table$ID2[cof1_table$tissue=='Muscle'])
   pdf(file = paste0('Intersection of Genotype changes for genes P_less ', pval_threshold, '.pdf'))
   g2=ggVennDiagram(gene_list, label_alpha = 0, label = "count") + scale_fill_distiller(palette = "RdYlBu") + ggtitle('Intersection of genotype changes for genes P_less ', pval_threshold)
   print(g2)
