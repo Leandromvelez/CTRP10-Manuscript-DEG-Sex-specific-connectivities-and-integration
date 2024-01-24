@@ -16,7 +16,7 @@ Each analysis should operate independently with the provided links to required f
 Publicly available data used were acquired from (and pre processed for further analysis):
 GTEx V8: https://gtexportal.org/home/datasets (the raw data were filtered where individuals were required to show counts > 0 in 1.2e6 gene_tissue combinations across all data. Given that our goal was to look across tissues at enrichments, this was done to limit spurious influence of genes only expressed in specific tissues. Post-filtering consists of 310 individuals and 1.8e7 gene_tissue combinations). This results in 52% NA values in the final matrix used.
 ## Link to pre processed GTEx data used in this study
-## https://drive.google.com/file/d/16Wh-6nagVIBXwrFINCoFKBB5zuUqGFeL/view?usp=drive_link
+## [https://drive.google.com/file/d/16Wh-6nagVIBXwrFINCoFKBB5zuUqGFeL/view?usp=drive_link](https://drive.google.com/file/d/104d0lBOFHlt_iwUjzeOT4POIZRV7nY_l/view?usp=drive_link)
 ### Link to metadata including sex datatable
 ## https://drive.google.com/file/d/13Yg1a0uXagMffX0fTimLUhGhSgw-04I1/view?usp=drive_link
 
