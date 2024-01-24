@@ -10,7 +10,7 @@ library(reshape2)
 library(dplyr)
 library(ggplot2)
 library(WGCNA)
-## If preprocessed and impute are necessary, install from Bioconductor 
+## If preprocessed and impute are required, install from Bioconductor 
 # https://bioconductor.org/packages/release/bioc/html/preprocessCore.html
 # https://bioconductor.org/packages/release/bioc/html/impute.html
 library(limma)
