@@ -40,6 +40,7 @@ cnts_mat = new_cnts[,colSums(new_cnts)>5]
 cnts_mat$dm = ifelse(grepl('WT', row.names(cnts_mat)), 'WT', 'KO')
 cnts_mat$dm = factor(cnts_mat$dm, levels=c('WT', 'KO'))
 table(cnts_mat$dm)
+# design and run model
 design = model.matrix(~dm, data=cnts_mat)
 head(design)
 table(cnts_mat$dm)
@@ -48,7 +49,7 @@ new_cnts1 = as.data.frame(t(cnts_mat[, !colnames(cnts_mat)=='dm']))
 fit = lmFit(new_cnts1, design)
 fit = eBayes(fit)
 row.names(fit)[1:10]
-
+## results table
 res_table = topTable(fit, coef=NULL,number=Inf, genelist=row.names(fit), adjust.method="BH",
                      sort.by="B", resort.by=NULL, p.value=1, lfc=0, confint=FALSE)
 head(res_table)
@@ -61,7 +62,7 @@ test1$cond = ifelse(grepl('HF', row.names(test1)),  'HF', 'Chow')
 
 res1 = res_table
 head(res1)
-#need to play around to assessing proper thresholds.  
+#need to play around to assessing proper thresholds for volcano plot.  
 test_genes = as.vector(res1$ID[res1$P.Value<0.0001])
 label_key = res1$ID[res1$P.Value<0.0001]
 res1$label2 = ifelse(res1$ID %in% label_key, paste0(res1$ID), '')
