@@ -1,4 +1,4 @@
-## Link to tpm kallisto counts, copy file into working directory
+### Link to tpm kallisto counts, copy file into working directory
 ## https://drive.google.com/file/d/1RmYstO-Vo5ZvGd2rjgPZZ7p3MGeW3PmQ/view?usp=drive_link
 
 setwd('')
@@ -10,6 +10,9 @@ library(reshape2)
 library(dplyr)
 library(ggplot2)
 library(WGCNA)
+## If preprocessed and impute are necessary, install from Bioconductor 
+# https://bioconductor.org/packages/release/bioc/html/preprocessCore.html
+# https://bioconductor.org/packages/release/bioc/html/impute.html
 library(limma)
 library(ggrepel)
 library(enrichR)
