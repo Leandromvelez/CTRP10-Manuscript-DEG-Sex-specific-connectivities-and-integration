@@ -1,4 +1,4 @@
-## Link to tpm kallisto counts, copy file to working directory
+## Link to tpm kallisto counts, copy file into working directory
 ## https://drive.google.com/file/d/1RmYstO-Vo5ZvGd2rjgPZZ7p3MGeW3PmQ/view?usp=drive_link
 
 setwd('')
