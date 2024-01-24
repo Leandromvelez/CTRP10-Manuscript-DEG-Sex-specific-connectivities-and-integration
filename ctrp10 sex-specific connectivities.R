@@ -1,7 +1,7 @@
 ## Download required files and copy into working directory
 
 ## Link to R environment with GTEx data
-## https://drive.google.com/file/d/16Wh-6nagVIBXwrFINCoFKBB5zuUqGFeL/view?usp=drive_link
+## https://drive.google.com/file/d/104d0lBOFHlt_iwUjzeOT4POIZRV7nY_l/view?usp=drive_link
 
 ### Link to metadata including sex datatable
 ## https://drive.google.com/file/d/13Yg1a0uXagMffX0fTimLUhGhSgw-04I1/view?usp=drive_link
