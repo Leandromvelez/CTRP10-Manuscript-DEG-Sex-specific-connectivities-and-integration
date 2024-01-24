@@ -18,7 +18,7 @@ library(ggrepel)
 library(enrichR)
 
 
-
+## load counts tpms
 full_melted_cnts = read.csv('full melted kallisto tpm CTRP10.csv')
 head(full_melted_cnts)
 
@@ -30,7 +30,7 @@ full_melted_cnts$ms_geno = paste0(full_melted_cnts$mouse_ID, '_', full_melted_cn
 full_melted_cnts$logcnts = log2(full_melted_cnts$est_counts + 1)
 
 ##########################################################
-
+## generate matrix
 new_cnts = dcast(full_melted_cnts, ms_geno ~ gen_tissue, value.var = 'logcnts', fun.aggregate = mean, na.rm=T)
 row.names(new_cnts) = new_cnts$ms_geno
 new_cnts$ms_geno=NULL
