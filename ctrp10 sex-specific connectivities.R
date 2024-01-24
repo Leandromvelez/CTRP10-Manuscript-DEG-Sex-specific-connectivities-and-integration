@@ -1,4 +1,17 @@
-setwd('G:/My Drive/lab files/Will Wong/CTRP10/')
+## Download required files and copy into working directory
+
+## Link to R environment with GTEx data
+## https://drive.google.com/file/d/16Wh-6nagVIBXwrFINCoFKBB5zuUqGFeL/view?usp=drive_link
+
+### Link to metadata including sex datatable
+## https://drive.google.com/file/d/13Yg1a0uXagMffX0fTimLUhGhSgw-04I1/view?usp=drive_link
+
+## Link to human/mouse orthologs table
+## https://drive.google.com/file/d/1-6R13c546yWgHMlbunW5snDlkflZGicp/view?usp=drive_link
+
+# set working directory
+setwd('')
+
 library(ggVennDiagram)
 library(stringr)
 library(reshape2)
@@ -7,33 +20,31 @@ library(ggplot2)
 library(WGCNA)
 library(limma)
 library(ggrepel)
-de_results = read.csv('results from limma on KO over WT.csv')
-load('G:/My Drive/lab files/sex-difference myokine study/GTEx NA included env.RData')
-#metsim_genes = read.delim('G:/My Drive/Datasets/Human/METSIM_trx_adipose.txt')
-#metsim_clinical = read.delim('G:/My Drive/Datasets/Human/METSIM_clinical.txt')
+library(ggpubr)
+library(RColorBrewer)
 
-
-
+## load GTEx environment
+load('GTEx NA included env.RData')
 
 ###############################################################
-#METSIM Analysis
+# DEG results, from "Differential expression and integration" section
+# copy to working directory
+de_results = read.csv('results from limma on KO over WT.csv')
 res1 = de_results
 res1$tissue =gsub(".*_", "", res1$ID) 
 res1$gene_symbol = gsub("\\_.*","",res1$ID)
 
 
 ##########################
-#GTEx integration
-
-
-
+#GTEx sex specific integration
 working_dataset=GTEx_subfiltered
+GTEx_subfiltered = NULL
 row.names(working_dataset) = working_dataset$gene_tissue
 working_dataset$gene_tissue=NULL
 working_dataset = as.data.frame(t(working_dataset))
 working_dataset[1:5,1:5]
-test1 = working_dataset[,grepl('ITIH5', colnames(working_dataset))]
-sex_table = read.delim('G:/My Drive/lab files/sex-difference myokine study/github/raw files/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt')
+
+sex_table = read.delim('GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt')
 sex_table$GTEx_ID = gsub('GTEX-', '', sex_table$SUBJID)
 sex_table$sexMF = ifelse(sex_table$SEX==1, 'M', 'F')
 table(sex_table$sexMF)
@@ -48,8 +59,11 @@ females = new_trts[!new_trts$sexMF=='M',]
 #Subset two datasets for expression based on sex
 working_datasetM = working_dataset[row.names(working_dataset) %in% males$GTEx_ID,]
 working_datasetF = working_dataset[row.names(working_dataset) %in% females$GTEx_ID,]
+working_dataset = NULL
 full_sig_degs = res1[res1$P.Value<0.001,]
-orths = read.delim('G:/My Drive/Datasets/Mouse/genome files/Mouse Gene info with Human Orthologues.txt')
+
+## Integration with human orthologs
+orths = read.delim('Mouse Gene info with Human Orthologues.txt')
 full_sig_degs$human_orth = orths$human_orth[match(full_sig_degs$gene_symbol, orths$Symbol)]
 table(full_sig_degs$tissue)
 full_sig_degs$human_tissue = ifelse(full_sig_degs$tissue=='Liver', 'Liver', '')
@@ -73,7 +87,7 @@ colnames(ii)[1:10]
 
 anno = data.frame(row.names(cc3), Group=gsub(".*_","", row.names(cc3)))
 row.names(anno) = row.names(cc3)
-library(RColorBrewer)
+
 anno$row.names.cc3.=NULL
 pdf(file = 'global cor structure of DEGS - Males.pdf')
 breaksList = seq(-1, 1, by = .1)
@@ -100,7 +114,7 @@ colnames(ii)[1:10]
 
 anno = data.frame(row.names(cc3), Group=gsub(".*_","", row.names(cc3)))
 row.names(anno) = row.names(cc3)
-library(RColorBrewer)
+
 anno$row.names.cc3.=NULL
 pdf(file = 'global cor structure of DEGS - Females.pdf')
 breaksList = seq(-1, 1, by = .1)
@@ -124,7 +138,7 @@ ff2$tissue1 =gsub(".*_", "", ff2$gene1)
 ff2$tissue2 =gsub(".*_", "", ff2$gene2) 
 ff2$gene_symbol1 = gsub("\\_.*","",ff2$gene1)
 ff2$gene_symbol2 = gsub("\\_.*","",ff2$gene2)
-library(ggpubr)
+
 head(ff2)
 ff3 = ff2[ff2$tissue1==ff2$tissue2,]
 pdf(file = 'male vs female degs bicor comparison within tissue.pdf')
@@ -165,6 +179,8 @@ nn3 = new_delta[grepl('AGT_Adipose', new_delta$gene1),]
 #GPAT3_Liver
 #SLC41A3_Liver
 #ISCA1_Liver
+
+## function to plot gene 1_tissue1 x gene 2_tissue2
 gene1 = 'GPAT3_Liver'
 gene2 = 'C1QL2_Adipose - Visceral (Omentum)'
 
@@ -205,9 +221,6 @@ plot_gene_cor_bysex = function(gene1, gene2){
 #GPAT3_Liver
 #SLC41A3_Liver
 #ISCA1_Liver
+
+#example
 plot_gene_cor_bysex('GPAT3_Liver', 'C1QL2_Adipose - Subcutaneous')
-
-path_gene = 'GPAT3_Liver'
-ff4 = ff2[ff2$gene1==path_gene,]
-ff5 = ff4[ff4$tissue1==ff4$tissue2,]
-
