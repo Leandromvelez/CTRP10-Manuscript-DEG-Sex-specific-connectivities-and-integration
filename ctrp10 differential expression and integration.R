@@ -1,4 +1,8 @@
-setwd('G:/My Drive/lab files/Will Wong/CTRP10/')
+## Link to tpm kallisto counts, copy file to working directory
+## https://drive.google.com/file/d/1RmYstO-Vo5ZvGd2rjgPZZ7p3MGeW3PmQ/view?usp=drive_link
+
+setwd('')
+
 library(ggVennDiagram)
 library(stringr)
 library(reshape2)
@@ -7,6 +11,9 @@ library(ggplot2)
 library(WGCNA)
 library(limma)
 library(ggrepel)
+library(enrichR)
+
+
 
 full_melted_cnts = read.csv('full melted kallisto tpm CTRP10.csv')
 head(full_melted_cnts)
@@ -45,7 +52,8 @@ test1 = as.data.frame(cnts_mat[,colnames(cnts_mat) == 'Zbtb9_iWAT'])
 row.names(test1) = row.names(cnts_mat)
 test1$cond = ifelse(grepl('HF', row.names(test1)),  'HF', 'Chow') 
 
-write.csv(res_table, file = 'results from limma on KO over WT.csv', row.names = F)
+## write results into a csv file to use with sex specific integration scripts
+## write.csv(res_table, file = 'results from limma on KO over WT.csv', row.names = F)
 
 res1 = res_table
 head(res1)
@@ -83,6 +91,15 @@ legend("center",
        border = "black")
 dev.off()
 
+## for volcano plots of specific tissues, use grepl, and then ggplot
+
+# example
+
+## muscle = res1[grepl("Muscle", res1$ID),]
+## for changing the number of genes labeled, should re run from line 54, changing p value threshold
+## ggplot(muscle, aes(x=logFC, y=-log10(P.Value))) + theme_classic() +
+##  geom_point(aes(x=logFC, y=-log10(P.Value)), color=muscle$label_col2)  + geom_label_repel(aes(x=logFC, y=-log10(P.Value), label = muscle$label2), color = muscle$label_col2, size = 2, label.size=NA, box.padding = 0.8, point.padding = 0.5, max.overlaps = Inf, segment.color = 'grey50')  +   ggtitle('Volcano plot over let over cntl, Ovary BxD PCOS')
+
 
 proportions_plot = function(pval_threshold){
   cof1_table = res1[res1$P.Value<pval_threshold,]
@@ -101,7 +118,7 @@ proportions_plot = function(pval_threshold){
   g1 = ggplot(pp1, aes(x=tissue, y=freq, fill=direction)) + geom_bar(stat="identity", width=.5, position = "dodge") + theme_classic() + scale_fill_hue(l=20, c=60) + ylab('Frequency by datatype') + xlab('')+ theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) + ggtitle(paste0('Genotype changes P < ', pval_threshold))
   print(g1)
   dev.off()
-  }
+}
 
 proportions_plot(0.001)
 proportions_plot(0.01)
@@ -123,7 +140,6 @@ plot_intersects(0.0001)
 
 
 #pathways
-library(enrichR)
 
 
 setEnrichrSite("Enrichr")
@@ -136,40 +152,40 @@ table(cof1_table$tissue)
 
 tissue1 = 'gWAT'
 get_paths = function(tissue1){
-pp2 = cof1_table[cof1_table$tissue %in% tissue1,]
-pp1 = pp2[pp2$FC_cat== 'down-regulated'& pp2$P.Value<0.01,]
-#first for positive
-head(pp1)
-name_D = paste0('_', tissue1)
-pp1$gene_symbol = gsub(name_D, '', pp1$ID, fixed = T) 
-gg1 = pp1$gene_symbol
-enriched <- enrichr(gg1, dbs1)
-g1 = plotEnrich(enriched[[1]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('downregulated DEGs ', names(enriched[1]))) +theme(axis.text=element_text(size=5))
-                                                                                                                          
-
-g2 = plotEnrich(enriched[[2]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('downregulated DEGs ', names(enriched[2])))+theme(axis.text=element_text(size=5))
-
-g3 = plotEnrich(enriched[[3]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('downregulated DEGs ', names(enriched[3])))+theme(axis.text=element_text(size=5))
-
-
-pp1 = pp2[pp2$FC_cat== 'up-regulated'& pp2$P.Value<0.01,]
-#first for positive
-head(pp1)
-name_D = paste0('_', tissue1)
-pp1$gene_symbol = gsub(name_D, '', pp1$ID, fixed = T) 
-gg1 = pp1$gene_symbol
-enriched <- enrichr(gg1, dbs1)
-g4 = plotEnrich(enriched[[1]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('upregulated DEGs ', names(enriched[1])))+theme(axis.text=element_text(size=5))
-
-g5 = plotEnrich(enriched[[2]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('upregulated DEGs ', names(enriched[2])))+theme(axis.text=element_text(size=5))
-
-g6 = plotEnrich(enriched[[3]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('upregulated DEGs ', names(enriched[3])))+theme(axis.text=element_text(size=5))
-
-
-pdf(file = paste0(tissue1, ' full_paths.pdf'))
-gg3 = gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6)
-print(gg3)
-dev.off()
+  pp2 = cof1_table[cof1_table$tissue %in% tissue1,]
+  pp1 = pp2[pp2$FC_cat== 'down-regulated'& pp2$P.Value<0.01,]
+  #first for positive
+  head(pp1)
+  name_D = paste0('_', tissue1)
+  pp1$gene_symbol = gsub(name_D, '', pp1$ID, fixed = T) 
+  gg1 = pp1$gene_symbol
+  enriched <- enrichr(gg1, dbs1)
+  g1 = plotEnrich(enriched[[1]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('downregulated DEGs ', names(enriched[1]))) +theme(axis.text=element_text(size=5))
+  
+  
+  g2 = plotEnrich(enriched[[2]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('downregulated DEGs ', names(enriched[2])))+theme(axis.text=element_text(size=5))
+  
+  g3 = plotEnrich(enriched[[3]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('downregulated DEGs ', names(enriched[3])))+theme(axis.text=element_text(size=5))
+  
+  
+  pp1 = pp2[pp2$FC_cat== 'up-regulated'& pp2$P.Value<0.01,]
+  #first for positive
+  head(pp1)
+  name_D = paste0('_', tissue1)
+  pp1$gene_symbol = gsub(name_D, '', pp1$ID, fixed = T) 
+  gg1 = pp1$gene_symbol
+  enriched <- enrichr(gg1, dbs1)
+  g4 = plotEnrich(enriched[[1]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('upregulated DEGs ', names(enriched[1])))+theme(axis.text=element_text(size=5))
+  
+  g5 = plotEnrich(enriched[[2]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('upregulated DEGs ', names(enriched[2])))+theme(axis.text=element_text(size=5))
+  
+  g6 = plotEnrich(enriched[[3]], showTerms = 10, numChar = 40, y = "Ratio", orderBy = "P.value") + ggtitle(paste0('upregulated DEGs ', names(enriched[3])))+theme(axis.text=element_text(size=5))
+  
+  
+  pdf(file = paste0(tissue1, ' full_paths.pdf'))
+  gg3 = gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6)
+  print(gg3)
+  dev.off()
 }
 table(cof1_table$tissue)
 get_paths('gWAT')
