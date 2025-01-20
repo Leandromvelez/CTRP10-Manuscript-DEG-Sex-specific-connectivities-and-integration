@@ -1,3 +1,19 @@
+#########################################
+#                                       #
+#             For Figure 10             #
+#    Sex specific connectivities        #
+#                                       #
+#                                       #
+#########################################
+
+## Set working directory (folder where the file in the provided link is downloaded)
+# i.e.: setwd('C:/My Drive/Data/')
+
+# All the plots generated in these scripts will be saved in that directory
+
+setwd('')
+
+
 ## Download required files and copy into working directory
 
 ## Link to R environment with GTEx data
@@ -9,8 +25,10 @@
 ## Link to human/mouse orthologs table
 ## https://drive.google.com/file/d/1-6R13c546yWgHMlbunW5snDlkflZGicp/view?usp=drive_link
 
-# set working directory
-setwd('')
+
+
+
+## library packages required
 
 library(ggVennDiagram)
 library(stringr)
@@ -28,7 +46,9 @@ load('GTEx NA included env.RData')
 
 ###############################################################
 # DEG results, from "Differential expression and integration" section
+## Also here: https://drive.google.com/file/d/1RkEXp5QF1R30YiFea1vOxj3yAGmcqtL7/view?usp=drive_link
 # copy to working directory
+
 de_results = read.csv('results from limma on KO over WT.csv')
 res1 = de_results
 res1$tissue =gsub(".*_", "", res1$ID) 
@@ -37,8 +57,10 @@ res1$gene_symbol = gsub("\\_.*","",res1$ID)
 
 ##########################
 #GTEx sex specific integration
+
 working_dataset=GTEx_subfiltered
 GTEx_subfiltered = NULL
+GTEx_full = NULL
 row.names(working_dataset) = working_dataset$gene_tissue
 working_dataset$gene_tissue=NULL
 working_dataset = as.data.frame(t(working_dataset))
@@ -62,7 +84,14 @@ working_datasetF = working_dataset[row.names(working_dataset) %in% females$GTEx_
 working_dataset = NULL
 full_sig_degs = res1[res1$P.Value<0.001,]
 
-## Integration with human orthologs
+
+
+##################################################
+#                                                #
+#     Human orthologs DEG correlation - Males    #
+#                                                #
+##################################################
+
 orths = read.delim('Mouse Gene info with Human Orthologues.txt')
 full_sig_degs$human_orth = orths$human_orth[match(full_sig_degs$gene_symbol, orths$Symbol)]
 table(full_sig_degs$tissue)
@@ -83,6 +112,26 @@ cc3 = cc1$bicor
 cc3[is.na(cc3)] = 0
 cc4 = ifelse(cc1$p<0.01, '*', '')
 
+set1 = melt(cc1$bicor)
+head(set1)
+colnames(set1) = c('gene_1', 'gene_2', 'bicor')
+set2 = melt(cc1$p)
+set1$pvalue = set2$value
+set1 = set1[order(set1$pvalue),]
+set1 = set1[set1$gene_1 != set1$gene_2,]
+set2=NULL
+
+### Human orthologs DEG correlation - Males table, with bicorrelation and p values
+## Write table in working directory
+#write.csv(set1, 'correlated human DEG orthologs Males.csv')
+
+#############################################################################################################
+#                                                                                                           #
+# Or download here: https://drive.google.com/file/d/16Drfq8_C2WjYILYE0e4BmAuqcBg2rmTX/view?usp=drive_link   #
+#                                                                                                           #
+#############################################################################################################
+
+
 colnames(ii)[1:10]
 
 anno = data.frame(row.names(cc3), Group=gsub(".*_","", row.names(cc3)))
@@ -94,13 +143,23 @@ breaksList = seq(-1, 1, by = .1)
 pheatmap::pheatmap(cc3, annotation_row = anno, display_numbers = cc4,fontsize_row = 1, fontsize_col = 1,  fontsize_number = 5, labels_col = F, color = colorRampPalette(rev(brewer.pal(n = 7, name = "PuOr")))(length(breaksList)) )
 dev.off()
 
+
+
 full_cors_table = reshape2::melt(cc1$bicor)
 head(full_cors_table)
 colnames(full_cors_table) = c('gene1', 'gene2', 'bicor') 
 full_cors_table$pvalue = reshape2::melt(cc1$p)$value
 full_cors_table$sex = paste0('Males')
 ff1 = full_cors_table
-#####Now in Females
+
+
+
+####################################################
+#                                                  #
+#     Human orthologs DEG correlation - Females    #
+#                                                  #
+####################################################
+
 isogenes = working_datasetF[,colnames(working_datasetF) %in% gene_set]
 ii = na.omit(isogenes)
 
@@ -109,6 +168,27 @@ cc3 = cc1$bicor
 cc3[is.na(cc3)] = 0
 cc3 = na.omit(cc3)
 cc4 = ifelse(cc1$p<0.01, '*', '')
+
+set1 = melt(cc1$bicor)
+head(set1)
+colnames(set1) = c('gene_1', 'gene_2', 'bicor')
+set2 = melt(cc1$p)
+set1$pvalue = set2$value
+set1 = set1[order(set1$pvalue),]
+set1 = set1[set1$gene_1 != set1$gene_2,]
+set2=NULL
+
+### Human orthologs DEG correlation - Females table, with bicorrelation and p values
+
+## Write table in working directory
+#write.csv(set1, 'correlated human DEG orthologs Females.csv')
+
+##########################################################################################################
+#                                                                                                        #
+# Or download here: https://drive.google.com/file/d/16IYNeCuW69YoX1_OJObu2ub5ShUz1u3Z/view?usp=sharing   #
+#                                                                                                        #
+##########################################################################################################
+
 
 colnames(ii)[1:10]
 
@@ -120,6 +200,15 @@ pdf(file = 'global cor structure of DEGS - Females.pdf')
 breaksList = seq(-1, 1, by = .1)
 pheatmap::pheatmap(cc3, annotation_row = anno, display_numbers = cc4,fontsize_row = 1, fontsize_col = 1,  fontsize_number = 5, labels_col = F, color = colorRampPalette(rev(brewer.pal(n = 7, name = "PuOr")))(length(breaksList)) )
 dev.off()
+
+
+
+####################################################
+#                                                  #
+#     Within tissue gene-gene connectivity         #
+#                                                  #
+####################################################
+
 
 full_cors_table = reshape2::melt(cc1$bicor)
 head(full_cors_table)
@@ -147,6 +236,14 @@ ggboxplot(ff3, x = "sex", y = "absbic",
           add = "jitter") + stat_compare_means() + facet_wrap(~tissue1)
 dev.off()
 
+
+#################################################
+#                                               #
+#     Across tissues gene-gene connectivity     #
+#                                               #
+#################################################
+
+
 ff3 = ff2[!ff2$tissue1==ff2$tissue2,]
 ff3$t1t2 = paste0(ff3$tissue1, ' - ', ff3$tissue2)
 pdf(file = 'male vs female degs bicor comparison between tissue.pdf')
@@ -160,67 +257,3 @@ ggboxplot(ff3, x = "sex", y = "absbic",
          # The new stuff
          strip.text = element_text(size = 4))
 dev.off()
-
-
-
-
-ff2$gene1_gene2 = paste0(ff2$gene1, '_', ff2$gene2)
-table(ff2$sex)
-new_delta = ff2[ff2$sex=='Males',]
-new_delta1 = ff2[!ff2$sex=='Males',]
-new_delta$female_bicor = new_delta1$bicor[match(new_delta$gene1_gene2, new_delta1$gene1_gene2)]
-new_delta$female_pvale = new_delta1$pvalue[match(new_delta$gene1_gene2, new_delta1$gene1_gene2)]
-new_delta$delta_bicor = new_delta$bicor - new_delta$female_bicor
-new_delta = new_delta[order(abs(new_delta$delta_bicor), decreasing = T),]
-write.csv(new_delta, file = 'GTEx DEGS  correlation shift by sex.csv', row.names = F)
-
-nn3 = new_delta[grepl('AGT_Adipose', new_delta$gene1),]
-#C1QL2_Adipose - Visceral (Omentum)
-#GPAT3_Liver
-#SLC41A3_Liver
-#ISCA1_Liver
-
-## function to plot gene 1_tissue1 x gene 2_tissue2
-gene1 = 'GPAT3_Liver'
-gene2 = 'C1QL2_Adipose - Visceral (Omentum)'
-
-plot_gene_cor_bysex = function(gene1, gene2){
-  gg1 = as.data.frame(working_datasetM[,colnames(working_datasetM)==gene1])
-  row.names(gg1) = row.names(working_datasetM)
-  colnames(gg1) = 'gene1'
-  gg2 = as.data.frame(working_datasetM[,colnames(working_datasetM)==gene2])
-  row.names(gg2) = row.names(working_datasetM)
-  gg1$gene2 = gg2$`working_datasetM[, colnames(working_datasetM) == gene2]`[match(row.names(gg1), row.names(gg2))]
-  gg1$sex = paste0('Males')
-  
-  cors_plot = gg1
-  
-  gg1 = as.data.frame(working_datasetF[,colnames(working_datasetF)==gene1])
-  row.names(gg1) = row.names(working_datasetF)
-  colnames(gg1) = 'gene1'
-  gg2 = as.data.frame(working_datasetF[,colnames(working_datasetF)==gene2])
-  row.names(gg2) = row.names(working_datasetF)
-  gg1$gene2 = gg2$`working_datasetF[, colnames(working_datasetF) == gene2]`[match(row.names(gg1), row.names(gg2))]
-  gg1$sex = paste0('Females')
-  
-  cors_plot = as.data.frame(rbind(gg1, cors_plot))
-  
-  pdf(file = paste0(gene1, ' x ', gene2, ' sex-specific correlations.pdf'))
-  g1 =ggplot(cors_plot, aes(x=gene1, y=gene2, color = sex, fill = sex)) +
-    geom_point() +
-    geom_smooth(method = "lm") +
-    stat_cor(method = "pearson") +
-    scale_color_manual(values = c(Males = "red",  Females = 'dodgerblue1'), aesthetics = c("color", "fill")) +
-    theme_pubr() +
-    labs(x = paste0('Normalized ',gene1,   ' expression'), y = paste0('Normalized ',gene2,   ' expression')) 
-  print(g1)
-  dev.off()
-}
-
-#C1QL2_Adipose - Visceral (Omentum)
-#GPAT3_Liver
-#SLC41A3_Liver
-#ISCA1_Liver
-
-#example
-plot_gene_cor_bysex('GPAT3_Liver', 'C1QL2_Adipose - Subcutaneous')
