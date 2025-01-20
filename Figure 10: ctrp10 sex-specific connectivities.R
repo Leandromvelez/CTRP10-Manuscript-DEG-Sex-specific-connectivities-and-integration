@@ -221,6 +221,19 @@ table(full_cors_table$sex)
 
 ff2 = na.omit(full_cors_table)
 ff2 = ff2[!ff2$gene1==ff2$gene2,]
+
+### Human orthologs DEG correlation - Full table (males and females), with bicorrelation and p values
+
+## Write table in working directory
+#write.csv(ff2, 'correlated human DEG orthologs Full Table.csv')
+
+##########################################################################################################
+#                                                                                                        #
+# Or download here: https://drive.google.com/file/d/16PIwlsQw33m7AEPNHo9-FtmIws96SX1C/view?usp=sharing   #
+#                                                                                                        #
+##########################################################################################################
+
+
 ff2$logp = -log(ff2$pvalue)
 ff2$absbic = abs(ff2$bicor)
 ff2$tissue1 =gsub(".*_", "", ff2$gene1) 
