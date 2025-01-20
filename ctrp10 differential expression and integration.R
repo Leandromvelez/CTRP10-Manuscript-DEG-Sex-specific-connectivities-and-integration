@@ -1,6 +1,21 @@
 ### Link to tpm kallisto counts, copy file into working directory
 ## https://drive.google.com/file/d/1RmYstO-Vo5ZvGd2rjgPZZ7p3MGeW3PmQ/view?usp=drive_link
 
+
+#########################################
+#                                       #
+#             For Figure 8              #
+#    Differential Expression Analysis   #
+#          on KO over WT                #
+#                                       #
+#########################################
+
+
+## Set working directory (folder where the file in the provided link is downloaded)
+# i.e.: setwd('C:/My Drive/Data/')
+# All the plots generated in these scripts will be saved in that directory
+
+
 setwd('')
 
 ## library packages required
@@ -58,7 +73,17 @@ row.names(test1) = row.names(cnts_mat)
 test1$cond = ifelse(grepl('HF', row.names(test1)),  'HF', 'Chow') 
 
 ## write results into a csv file to use with sex specific integration scripts
-## write.csv(res_table, file = 'results from limma on KO over WT.csv', row.names = F)
+##  write.csv(res_table, file = 'results from limma on KO over WT.csv', row.names = F)
+
+## Or
+
+###########################################################################################
+#                                                                                         #
+#  Download the differential expression table here:                                       #
+#  https://drive.google.com/file/d/1RkEXp5QF1R30YiFea1vOxj3yAGmcqtL7/view?usp=drive_link  #
+#   also available in the manuscript, as supplemental, in Figure 8 – source data 1.       #
+#                                                                                         #
+###########################################################################################
 
 res1 = res_table
 head(res1)
@@ -79,8 +104,16 @@ color_key_table$color = color_sets$colors[match(color_key_table$tissue, color_se
 res1$label_col1 = color_key_table$color[match(res1$ID, color_key_table$ID)]
 
 res1$label_col2 = ifelse(res1$P.Value<0.01, paste0(res1$label_col1), 'gray74')
+
 #Number of genes which will be labelled
-#Volcano plot
+
+
+#######################
+#                     #
+#     Volcano plot    #
+#                     #
+#######################
+
 pdf(file = 'Volcano Plot of KO over WT.pdf')
 ggplot(res1, aes(x=logFC, y=-log10(P.Value))) + theme_classic() +
   geom_point(aes(x=logFC, y=-log10(P.Value)), color=res1$label_col2)  + geom_label_repel(aes(x=logFC, y=-log10(P.Value), label = res1$label2), color = res1$label_col2, size = 2, label.size=NA, box.padding = 0.8, point.padding = 0.5, max.overlaps = Inf, segment.color = 'grey50')  +   ggtitle('Volcano plot over KO over WT')
@@ -106,6 +139,15 @@ dev.off()
 ##  geom_point(aes(x=logFC, y=-log10(P.Value)), color=muscle$label_col2)  + geom_label_repel(aes(x=logFC, y=-log10(P.Value), label = muscle$label2), color = muscle$label_col2, size = 2, label.size=NA, box.padding = 0.8, point.padding = 0.5, max.overlaps = Inf, segment.color = 'grey50')  +   ggtitle('Volcano plot over let over cntl, Ovary BxD PCOS')
 
 
+
+#####################################################
+#                                                   #
+#     Proportions of Significant DEGs (KO / WT )    #
+#                                                   #
+#####################################################
+
+
+
 proportions_plot = function(pval_threshold){
   cof1_table = res1[res1$P.Value<pval_threshold,]
   cof1_table$FC_cat = ifelse(cof1_table$logFC>1.2, 'up-regulated', 'down-regulated')
@@ -128,6 +170,15 @@ proportions_plot = function(pval_threshold){
 proportions_plot(0.001)
 proportions_plot(0.01)
 proportions_plot(0.05)
+
+
+############################################
+#                                          #
+#     Intersections of Significant DEGs    #
+#                                          #
+############################################
+
+
 plot_intersects = function(pval_threshold){
   cof1_table = res1[res1$P.Value<pval_threshold,]
   cof1_table$tissue =gsub(".*_", "", cof1_table$ID)
@@ -144,7 +195,12 @@ plot_intersects(0.001)
 plot_intersects(0.0001)
 
 
-#pathways
+
+##################################################
+#                                                #
+#     Tissue-specific top pathway enrichments    #
+#                                                #
+##################################################
 
 
 setEnrichrSite("Enrichr")
@@ -198,3 +254,4 @@ get_paths('Liver')
 
 get_paths('iWAT')
 get_paths('Muscle')
+
